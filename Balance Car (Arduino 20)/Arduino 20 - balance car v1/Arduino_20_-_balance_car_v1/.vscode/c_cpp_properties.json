@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "windows-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "F:\\Arduino 1.8.19\\Arduino\\libraries/**",
+                "D:\\jlisa\\Document\\ArduinoData\\packages\\esp32\\hardware\\esp32\\2.0.9\\libraries/**",
+                "D:\\jlisa\\Document\\ArduinoData\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\libraries/**",
+                "D:\\Arduino Libraries\\libraries"
+            ],
+            "browse": {
+                "path": [
+                    "F:\\Arduino 1.8.19\\Arduino\\libraries/**",
+                    "D:\\jlisa\\Document\\ArduinoData\\packages\\esp32\\hardware\\esp32\\2.0.9\\libraries/**",
+                    "D:\\jlisa\\Document\\ArduinoData\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\libraries/**",
+                    "D:\\Arduino Libraries\\libraries/**"
+                ]
+            }
+        }
+    ],
+    "version": 4
+}

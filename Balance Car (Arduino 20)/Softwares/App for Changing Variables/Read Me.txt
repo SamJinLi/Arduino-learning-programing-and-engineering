@@ -1,0 +1,3 @@
+﻿Version 1: Useless, used to save progress
+Version 2: finished, lack of Bluetooth connections + formatting & sending information (FORMATTING IS THE KEY!!)
+

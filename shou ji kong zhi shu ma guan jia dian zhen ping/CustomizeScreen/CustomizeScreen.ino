@@ -1,0 +1,73 @@
+//din to d5, cs to d4, clk to d3
+//蓝牙模块端口：RXD是11, TXD是10。
+# include <SoftwareSerial.h>
+SoftwareSerial mySerial (10, 11);
+#include <MsTimer2.h>
+String test = "", test2 = "";
+int num = 0;
+String date = "";
+unsigned char disp1[12][8] = {
+  {0x3C, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3C}, //0
+  {0x08, 0x18, 0x28, 0x08, 0x08, 0x08, 0x08, 0x08}, //1
+  {0x7E, 0x2, 0x2, 0x7E, 0x40, 0x40, 0x40, 0x7E}, //2
+  {0x3E, 0x2, 0x2, 0x3E, 0x2, 0x2, 0x3E, 0x0}, //3
+  {0x8, 0x18, 0x28, 0x48, 0xFE, 0x8, 0x8, 0x8}, //4
+  {0x3C, 0x20, 0x20, 0x3C, 0x4, 0x4, 0x3C, 0x0}, //5
+  {0x3C, 0x20, 0x20, 0x3C, 0x24, 0x24, 0x3C, 0x0}, //6
+  {0x3E, 0x22, 0x4, 0x8, 0x8, 0x8, 0x8, 0x8}, //7
+  {0x0, 0x3E, 0x22, 0x22, 0x3E, 0x22, 0x22, 0x3E}, //8
+  {0x3E, 0x22, 0x22, 0x3E, 0x2, 0x2, 0x2, 0x3E}, //9
+  {0x08, 0x7F, 0x49, 0x49, 0x7F, 0x08, 0x08, 0x08}, //中
+  {0xFE, 0xFE, 0x92, 0xFE, 0x9A, 0xFE, 0x82, 0xFE}, //国
+};
+
+unsigned char customize[10] = {
+  //初始化点
+};
+void flash()
+{
+
+}
+void setup() {
+  DZP_init();
+  MsTimer2::set(5, flash); // 500ms period
+  MsTimer2::start();
+  Serial.begin(9600);
+  mySerial.begin(9600);
+}
+unsigned char customize2[10] = {
+
+};
+int temp;
+void loop() {
+  if (mySerial.available())
+  {
+    while (mySerial.available())
+    {
+      date += char(mySerial.read()); // a+=1   a=a+1
+      delay(1);   //等待缓存数据
+    }
+    for (int j = 0; j < 8; j ++) {
+      customize[j] = date.substring(j * 5 + 2 , j * 5 + 5).toInt();
+    }
+    for (int x = 0; x < 8; x++) {
+      for (int i = 0; i < 8; i ++) {
+        bitWrite(temp, i, bitRead(customize[7 - i], x));
+        Serial.print("temp");
+        Serial.print(i);
+        
+      }
+      customize2[x] = temp;
+      Serial.print("customize 2-");
+        Serial.print(x);
+        Serial.print(" :");
+        Serial.println(customize2[x]);
+    }
+    date = "";
+    for (int Rol = 0; Rol < 8; Rol++) {
+      Write_Max7219(Rol+1, customize2 [Rol]);
+      Serial.print(Rol);
+    }
+  }
+
+}
