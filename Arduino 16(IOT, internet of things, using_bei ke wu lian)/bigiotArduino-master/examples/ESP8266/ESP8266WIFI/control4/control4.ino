@@ -39,27 +39,13 @@ void setup()
 WiFiClient client;
 void loop()
 {
-  {
-    delay(10);
-    while(digitalRead(Switch) == true) 
     {
-      delay(10);
-    // do nothing while the button is pressed  
-    }
-    lit =1;
-    On();
-    }
-  if (digitalRead(Switch) == true && lit == 1)
-  {
-    delay(10);
-    while(digitalRead(Switch) == true) 
-    {
-      
-    // do nothing while the button is pressed  
-    }
-    lit =1;
-    Off();
-  }
+  //   int n = digitalRead(Switch); //创建变量n，并采集switch数字口的状态，赋值给n
+  // // Serial.println(n);
+  // if (n == 0) //如果n为高电平，执行下面的语句，否则跳过
+  // {
+  // delay(500); //消除抖动
+  // digitalWrite(LED, !digitalRead(LED));
 
 
   while (WiFi.status() != WL_CONNECTED)
