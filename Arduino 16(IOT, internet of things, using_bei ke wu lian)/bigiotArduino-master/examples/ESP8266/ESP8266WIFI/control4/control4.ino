@@ -1,4 +1,4 @@
-// remember: when changing the pin number, reference to the ESP8266's pin references or whatever board you're using. Look for the GPIO pin instead of the "D" pins!!!   
+// remember: when changing the pin number, reference to the ESP8266's pin references or whatever board you're using. Look for the GPIO pin instead of the "D" pins!!!
 /*
     此文件需安装Arduino esp8266开发环境支持，环境搭建参见：http://www.bigiot.net/talk/237.html
     本程序可以用来控制四路继电器
@@ -12,35 +12,33 @@
 #include <aJSON.h>
 #include <WiFiClientSecure.h>
 //=============  此处必须修该============
-String DEVICEID = "27283"; // 你的设备编号   ==
-String  APIKEY = "309733cb1"; // 设备密码==
+String DEVICEID = "31288";   // 你的设备编号   ==
+String APIKEY = "6ce273877"; // 设备密码==
 //=======================================
-unsigned long lastCheckInTime = 0; //记录上次报到时间
+unsigned long lastCheckInTime = 0;           // 记录上次报到时间
 const unsigned long postingInterval = 40000; // 每隔40秒向服务器报到一次
 
-const char* ssid     = "Frontier4960";//无线名称
-const char* password = "1782597198";//无线密码
+const char *ssid = "Frontier4960";   // 无线名称
+const char *password = "1782597198"; // 无线密码
 
-const char* host = "www.bigiot.net";
+const char *host = "www.bigiot.net";
 const int httpPort = 8181;
 
-int LED = 5, Switch = 15, lit = 0;
+int LED = 14, Switch = 15, lit = 0;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   delay(1000);
   WiFi.begin(ssid, password);
-  //默认输出关闭电频
-  pinMode (LED,OUTPUT);
-  pinMode (Switch, INPUT);
+  // 默认输出关闭电频
+  pinMode(LED, OUTPUT);
+  pinMode(Switch, INPUT);
 }
 
 WiFiClient client;
-int flag = 0;
-void loop() {
-//attempt failed on adding a switch to the light
-Serial.println(Switch);
-  if(digitalRead(Switch) == true && lit == 0)
+void loop()
+{
   {
     delay(10);
     while(digitalRead(Switch) == true) 
@@ -62,31 +60,39 @@ Serial.println(Switch);
     lit =1;
     Off();
   }
-  while (WiFi.status() != WL_CONNECTED) {
+
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(1000);
     Serial.print(".");
   }
 
   // Use WiFiClient class to create TCP connections
-  if (!client.connected()) {
-    if (!client.connect(host, httpPort)) {
+  if (!client.connected())
+  {
+    if (!client.connect(host, httpPort))
+    {
       Serial.println("connection failed");
       delay(5000);
       return;
     }
   }
 
-  if (millis() - lastCheckInTime > postingInterval || lastCheckInTime == 0) {
+  if (millis() - lastCheckInTime > postingInterval || lastCheckInTime == 0)
+  {
     checkIn();
   }
-  
+
   // Read all the lines of the reply from server and print them to Serial
-  if (client.available()) {
+  if (client.available())
+  {
     String inputString = client.readStringUntil('\n');
     inputString.trim();
     Serial.println(inputString);
     int len = inputString.length() + 1;
-    if (inputString.startsWith("{") && inputString.endsWith("}")) {
+    if (inputString.startsWith("{") && inputString.endsWith("}"))
+    {
       char jsonString[len];
       inputString.toCharArray(jsonString, len);
       aJsonObject *msg = aJson.parse(jsonString);
@@ -96,15 +102,18 @@ Serial.println(Switch);
   }
 }
 
-void processMessage(aJsonObject *msg) {
-  aJsonObject* method = aJson.getObjectItem(msg, "M");
-  aJsonObject* content = aJson.getObjectItem(msg, "C");
-  aJsonObject* client_id = aJson.getObjectItem(msg, "ID");
-  if (!method) {
+void processMessage(aJsonObject *msg)
+{
+  aJsonObject *method = aJson.getObjectItem(msg, "M");
+  aJsonObject *content = aJson.getObjectItem(msg, "C");
+  aJsonObject *client_id = aJson.getObjectItem(msg, "ID");
+  if (!method)
+  {
     return;
   }
   String M = method->valuestring;
-  if (M == "say") {
+  if (M == "say")
+  {
     String C = content->valuestring;
     String F_C_ID = client_id->valuestring;
     /*if(C == "plus"){
@@ -159,33 +168,32 @@ void processMessage(aJsonObject *msg) {
       analogWrite(D6, b);
       }
     */
-    
-    if (C == "play") {
-      digitalWrite(5, 1);
-      lit = 1;
+
+    if (C == "play")
+    {
+      digitalWrite(LED, 1);
+//      lit = 1;
       sayToClient(F_C_ID, "Lamp on!");
       Serial.println("on");
-    } else if (C == "stop") {
-      lit = 0;
-      digitalWrite(5, 0);
+    }
+    else if (C == "stop")
+    {
+//      lit = 0;
+      digitalWrite(LED, 0);
       sayToClient(F_C_ID, "Lamp off!");
       Serial.println("off");
-    } 
+    }
   }
 }
-void On(){
-  digitalWrite(LED, 1);
-}
-void off(){
-  digitalWrite(LED,0);
-}
-void checkIn() {
+void checkIn()
+{
   String msg = "{\"M\":\"checkin\",\"ID\":\"" + DEVICEID + "\",\"K\":\"" + APIKEY + "\"}\n";
   client.print(msg);
   lastCheckInTime = millis();
 }
 
-void sayToClient(String client_id, String content) {
+void sayToClient(String client_id, String content)
+{
   String msg = "{\"M\":\"say\",\"ID\":\"" + client_id + "\",\"C\":\"" + content + "\"}\n";
   client.print(msg);
   lastCheckInTime = millis();
