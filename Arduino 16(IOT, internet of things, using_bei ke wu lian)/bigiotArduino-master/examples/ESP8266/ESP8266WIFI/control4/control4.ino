@@ -168,14 +168,14 @@ void processMessage(aJsonObject *msg)
     {
       digitalWrite(LED, 1);
 //      lit = 1;
-      sayToClient(F_C_ID, "Lamp on!");
+      sayToClient(F_C_ID, "Fish lamp on!");
       Serial.println("on");
     }
     else if (C == "stop")
     {
 //      lit = 0;
       digitalWrite(LED, 0);
-      sayToClient(F_C_ID, "Lamp off!");
+      sayToClient(F_C_ID, "Fish lamp off!");
       Serial.println("off");
     }
   }
