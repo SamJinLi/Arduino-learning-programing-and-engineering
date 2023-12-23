@@ -1,8 +1,22 @@
+#include <Arduino.h>
 /*
 // TODO: Test
 */
+#include "BluetoothSerial.h"
 #include <ESP32Encoder.h>
 #include <Ticker.h>
+
+//PID constants
+double kp = 0.1;
+double ki = 0;
+double kd = 0;
+ 
+unsigned long currentTime, previousTime;
+double elapsedTime;
+double error;
+double lastError;
+double input, output, setPoint;
+double cumError, rateError;
 
 const int m1p1 = 12, m1p2 = 13, m1rx1 = 36, m1rx2 = 39, m2p1 = 2, m2p2 = 15, m2rx1 = 34, m2rx2 = 35;
 int motorspeed = 0; 
@@ -11,6 +25,18 @@ ESP32Encoder encoder;
 ESP32Encoder encoder2;
 float encoder1val, encoder2val;
 Ticker encoderUpdater;
+
+String device_name = "ESP32BT";
+
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+#if !defined(CONFIG_BT_SPP_ENABLED)
+#error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
+#endif
+
+BluetoothSerial SerialBT;
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,40 +66,57 @@ void setup() {
   //Initialize encoder updater
   encoderUpdater.attach_ms(100, updateEncoder);
 
+  //Bluetooth setup begins here
+  SerialBT.begin(device_name); //Bluetooth device name
+  Serial.printf("The device with name \"%s\" is started.\nNow you can pair it with Bluetooth!\n", device_name.c_str());
+  //   Bluetooth setup ends here
   pinMode(m1p1, OUTPUT);
   pinMode(m1p2, OUTPUT);
   pinMode(m1rx1, INPUT);
   pinMode(m1rx2, INPUT);
   Serial.begin(115200);
+
+  analogWrite(m1p1,255);
+  analogWrite(m1p2,0);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   String data = "";
-//  蓝牙通信在loop里！
-  //   if (Serial.available())
-  //  {
-  //    while (Serial.available())
-  //    {
-  //      data += char(Serial.read()); // a+=1   a=a+1
-  //      delay(2);   //等待缓存数据
-  //    }
-  //      motorspeed = data.toInt();
-  //  }
-  //  if (motorspeed.substring(0,1) != -) {//坦克左履带前进
-  //          String temp1 = "";
-  //          analogWrite(m1p1, motorspeed);
-  //          analogWrite(m1p2, 0);
-  //        }
-  //        else if (motorspeed.substring(0,1) == -) {//坦克左履带后退
-  //          analogWrite(m1p1, 0);
-  //          analogWrite(m1p2, motorspeed);
-  //        }
-  Serial.println(String(encoder1val) + String(encoder2val));
-  analogWrite(m1p1, 0);
-  analogWrite(m1p2, 255);
+   if (Serial.available()) {
+    SerialBT.write(Serial.read());
+  }
+  if (SerialBT.available()) {
+     while (SerialBT.available())
+     {
+       data += char(SerialBT.read()); // a+=1   a=a+1
+       delay(2);   //等待缓存数据
+     }
+    Serial.println(data);
+  }
+  delay(20);
+  input = encoder1val; 
+  setPoint = -1555;
+  output = computePID(input);
+  delay(100);
+  if (output > 0){
+    analogWrite(m1p1, output); //2
+    analogWrite(m1p2, 0); //15
+  }
+  else if (output < 0){
+    analogWrite(m1p1, 0);
+    analogWrite(m1p2,abs(output));
+  }
+  else{
+    analogWrite(m1p1, 0);
+    analogWrite(m1p2, 0);
+  }
+  
+  // analogWrite(m1p1, 255);
+  // analogWrite(m1p2, 0);
   analogWrite(m2p1, 0);
-  analogWrite(m2p2, 255);
+  analogWrite(m2p2, 0);
+  Serial.println("Encoder 1 val: " + String(encoder1val) + " Encoder 2 val: " + String(encoder2val) + " Output: " + output);
   delay(5);
 }
 
@@ -85,4 +128,20 @@ void updateEncoder () {
   encoder2.setCount(0);
 //  PID 控制要在中断里！
   
+}
+
+double computePID(double inp){     
+        currentTime = millis();                //get current time
+        elapsedTime = (double)(currentTime - previousTime);        //compute time elapsed from previous computation
+        
+        error = setPoint - inp;                                // determine error
+        cumError += error * elapsedTime;                // compute integral     
+        rateError = (error - lastError)/elapsedTime;   // compute derivative
+ 
+        double out = kp*error + ki*cumError + kd*rateError;                //PID output               
+ 
+        lastError = error;                                //remember current error
+        previousTime = currentTime;                        //remember current time
+ 
+        return out;                                        //have function return the PID output
 }

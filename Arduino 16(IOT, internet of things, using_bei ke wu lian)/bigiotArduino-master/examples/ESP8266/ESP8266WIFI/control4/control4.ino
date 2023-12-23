@@ -18,8 +18,8 @@ String APIKEY = "6ce273877"; // 设备密码==
 unsigned long lastCheckInTime = 0;           // 记录上次报到时间
 const unsigned long postingInterval = 40000; // 每隔40秒向服务器报到一次
 
-const char *ssid = "Frontier4960";   // 无线名称
-const char *password = "1782597198"; // 无线密码
+const char *ssid = "TP-Link_5340";   // 无线名称
+const char *password = "12709656"; // 无线密码
 
 const char *host = "www.bigiot.net";
 const int httpPort = 8181;

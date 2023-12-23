@@ -1,3 +1,5 @@
 ﻿Version 1: Useless, used to save progress
 Version 2: finished, lack of Bluetooth connections + formatting & sending information (FORMATTING IS THE KEY!!)
+Versoin 2.3: added digits mode
+Version 2.4: Added test on #5 display tag, HAVEN'T TESTED YET (remove after test)
 

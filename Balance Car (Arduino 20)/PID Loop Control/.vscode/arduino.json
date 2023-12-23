@@ -1,0 +1,7 @@
+{
+    "board": "esp32:esp32:esp32",
+    "port": "COM4",
+    "programmer": "esptool",
+    "sketch": "PID Loop Control.ino",
+    "output": "D:\\jlisa\\Document\\VSCode Arduino Output Files\\PID Loop Control"
+}
