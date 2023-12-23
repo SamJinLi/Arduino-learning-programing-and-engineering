@@ -157,6 +157,13 @@ void processMessage(aJsonObject *msg)
       }
     */
 
+    if (C == "pause")
+    {
+      String stats = digitalRead(LED) ? "on" : "off";
+      Serial.println(digitalRead(LED) ? "on" : "off"); 
+      sayToClient(F_C_ID, "Stats: " + stats);
+    }
+
     if (C == "play")
     {
       digitalWrite(LED, 1);
