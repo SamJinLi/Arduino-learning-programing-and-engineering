@@ -24,7 +24,7 @@ const char *password = "12709656"; // 无线密码
 const char *host = "www.bigiot.net";
 const int httpPort = 8181;
 
-int LED = 14, Switch = 15, lit = 0;
+int LED = 15, Switch = 14, lit = 0;
 
 void setup()
 {
@@ -159,14 +159,14 @@ void processMessage(aJsonObject *msg)
 
     if (C == "pause")
     {
-      String stats = digitalRead(LED) ? "on" : "off";
-      Serial.println(digitalRead(LED) ? "on" : "off"); 
+      String stats = digitalRead(LED) ? "off" : "on";
+      // Serial.println(digitalRead(LED) ? "on" : "off"); 
       sayToClient(F_C_ID, "Stats: " + stats);
     }
 
     if (C == "play")
     {
-      digitalWrite(LED, 1);
+      digitalWrite(LED, 0);
 //      lit = 1;
       sayToClient(F_C_ID, "Fish lamp on!");
       Serial.println("on");
@@ -174,7 +174,7 @@ void processMessage(aJsonObject *msg)
     else if (C == "stop")
     {
 //      lit = 0;
-      digitalWrite(LED, 0);
+      digitalWrite(LED, 1);
       sayToClient(F_C_ID, "Fish lamp off!");
       Serial.println("off");
     }
