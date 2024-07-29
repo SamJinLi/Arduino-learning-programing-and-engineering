@@ -47,7 +47,7 @@ void setup() {
 
   //ESP32Encoder::useInternalWeakPullResistors=DOWN;
   // Enable the weak pull up resistors
-  ESP32Encoder::useInternalWeakPullResistors = UP;
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
 
   // use pin 19 and 18 for the first encoder
   encoder.attachHalfQuad(36, 39);
@@ -72,50 +72,58 @@ void setup() {
   //   Bluetooth setup ends here
   pinMode(m1p1, OUTPUT);
   pinMode(m1p2, OUTPUT);
+  pinMode(m2p1, OUTPUT);
+  pinMode(m2p2, OUTPUT);
   pinMode(m1rx1, INPUT);
   pinMode(m1rx2, INPUT);
   Serial.begin(115200);
 
-  analogWrite(m1p1,255);
-  analogWrite(m1p2,0);
+  // analogWrite(m1p1,255);
+  // analogWrite(m1p2,0);
+
+
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  String data = "";
-   if (Serial.available()) {
-    SerialBT.write(Serial.read());
-  }
-  if (SerialBT.available()) {
-     while (SerialBT.available())
-     {
-       data += char(SerialBT.read()); // a+=1   a=a+1
-       delay(2);   //等待缓存数据
-     }
-    Serial.println(data);
-  }
-  delay(20);
-  input = encoder1val; 
-  setPoint = -1555;
-  output = computePID(input);
-  delay(100);
-  if (output > 0){
-    analogWrite(m1p1, output); //2
-    analogWrite(m1p2, 0); //15
-  }
-  else if (output < 0){
-    analogWrite(m1p1, 0);
-    analogWrite(m1p2,abs(output));
-  }
-  else{
-    analogWrite(m1p1, 0);
-    analogWrite(m1p2, 0);
-  }
+  // String data = "";
+  //  if (Serial.available()) {
+  //   SerialBT.write(Serial.read());
+  // }
+  // if (SerialBT.available()) {
+  //    while (SerialBT.available())
+  //    {
+  //      data += char(SerialBT.read()); // a+=1   a=a+1
+  //      delay(2);   //等待缓存数据
+  //    }
+  //   Serial.println(data);
+  // }
+  // delay(20);
+  // input = encoder1val; 
+  // setPoint = -1555;
+  // output = computePID(input);
+  // delay(100);
+  //     analogWrite(m2p1, 255);
+  // analogWrite(m2p2, 0);
+  // if (output > 0){
+  //   analogWrite(m1p1, output); //2
+  //   analogWrite(m1p2, 0); //15
+  // }
+  // else if (output < 0){
+  //   analogWrite(m1p1, 0);
+  //   analogWrite(m1p2,abs(output));
+  // }
+  // else{
+  //   analogWrite(m1p1, 0);
+  //   analogWrite(m1p2, 0);
+  // }
+  analogWrite(m1p1, 255);
+  analogWrite(m2p1, 255);
   
   // analogWrite(m1p1, 255);
   // analogWrite(m1p2, 0);
-  analogWrite(m2p1, 0);
-  analogWrite(m2p2, 0);
+  // analogWrite(m2p1, 0);
+  // analogWrite(m2p2, 0);
   Serial.println("Encoder 1 val: " + String(encoder1val) + " Encoder 2 val: " + String(encoder2val) + " Output: " + output);
   delay(5);
 }
