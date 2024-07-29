@@ -10,7 +10,14 @@
 */
 #include "DFRobot_ADXL345.h"
 
+#include <Wire.h>
+
+#include <vector>
+
 #define cs_pin 10
+
+#define I2C_SDA 33
+#define I2C_SCL 32
 
 DFRobot_ADXL345_I2C ADXL345(&Wire, 0x53);
 /**
@@ -18,9 +25,12 @@ DFRobot_ADXL345_I2C ADXL345(&Wire, 0x53);
 */
 // DFRobot_ADXL345_SPI ADXL345(&SPI, cs_pin);
 
+TwoWire DFRobot_ADXL345_I2C = TwoWire(0);
+
 void setup()
 {
-  Serial.begin(9600);
+  Wire.begin();
+  Serial.begin(115200);
   ADXL345.begin();
   ADXL345.powerOn();
 }
@@ -55,19 +65,23 @@ void loop()
     
     }
   else {
-    /*Serial.print(Filter_Value); // 串口输出
+    Serial.print("x ");
+    Serial.print(Filter_Value); // 串口输出
     Serial.print(",");
+    Serial.print("y ");
     Serial.print(Filter_Value_Y);
     Serial.print(",");
+    Serial.print("z ");
     Serial.print(Filter_Value_Z);
     Serial.print(",");
-    */
+    
     //Serial.print(Get_AD());
    // Serial.print(",");
     //Serial.print(Get_AD_Y());
    // Serial.print(",");
     Serial.println(Get_AD_Z());
     }
+    Serial.println("hi " +  String(Get_AD()));
   delay(2);
  /*if (Filter_Value > 175) {
     delay(1500);
@@ -134,4 +148,11 @@ float Filter_Z() {
   NewValue = Get_AD_Z();
   Value_Z = ((float)NewValue * FILTER_A + (1.0 - FILTER_A) * (float)Value_Z);
   return Value_Z;
-} 
+}
+
+void pitchAndRoll()
+{
+  ADXL345.RPCalculate(accval);
+  Serial.print("Roll:"); Serial.println( ADXL345.RP.roll );
+  Serial.print("Pitch:"); Serial.println( ADXL345.RP.pitch );
+}
