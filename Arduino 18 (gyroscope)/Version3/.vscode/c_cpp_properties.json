@@ -2,8 +2,8 @@
     "version": 4,
     "configurations": [
         {
-            "name": "Arduino",
-            "compilerPath": "@C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\tools\\warnings\\default-g++",
+            "name": "windows-clang-x64",
+            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
             "compilerArgs": [
                 "-U__STRICT_ANSI__",
                 "-free",
@@ -15,15 +15,10 @@
                 "-falign-functions=4",
                 "-std=gnu++17"
             ],
-            "intelliSenseMode": "gcc-x64",
+            "intelliSenseMode": "${default}",
             "includePath": [
-                "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\tools\\sdk\\include",
-                "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\tools\\sdk\\lwip2\\include",
-                "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\cores\\esp8266",
-                "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\variants\\nodemcu",
-                "E:\\RJ9P\\Documents\\Arduino\\libraries\\DFRobot_ADXL345",
-                "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\libraries\\Wire",
-                "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\libraries\\SPI"
+                "${workspaceFolder}/**",
+                "C:\\Users\\jlisa\\AppData\\Local\\Arduino15\\packages/**"
             ],
             "forcedInclude": [
                 "C:\\Users\\RJ9P\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.1\\cores\\esp8266\\Arduino.h"
