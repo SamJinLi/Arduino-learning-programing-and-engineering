@@ -23,7 +23,7 @@
 #include "HID-Project.h"
 
 const int pinLed = LED_BUILTIN;
-int pinButton = 0;
+int pinButton = 17;
 
 void setup() {
   pinMode(pinLed, OUTPUT);
