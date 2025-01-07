@@ -10,6 +10,14 @@
 
   See HID Project documentation for more infos
   https://github.com/NicoHood/HID/wiki/Gamepad-API
+
+
+  Samuel's comment:
+    search HID-Project in arduino's library & install it for this to work
+    If using uno please read the following instruction (or if using hoodloader2)
+    install :https://raw.githubusercontent.com/NicoHood/HoodLoader2/master/package_NicoHood_HoodLoader2_index.json
+    in preference (look for "extra board links" or "something something link" after press ctrl+comma)
+    For my case my uno is 16u2 uno so the board is hoodloader216u2 & my cores are hoodloader2 uno, change it if it's not the case
 */
 
 #include "HID-Project.h"
