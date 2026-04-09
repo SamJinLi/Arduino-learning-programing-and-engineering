@@ -109,19 +109,20 @@ void displayRange(void)
 
 void setup(void) 
 {
-//#ifndef ESP8266
-//  while (!Serial); // for Leonardo/Micro/Zero
-//#endif
+  //#ifndef ESP8266
+  //  while (!Serial); // for Leonardo/Micro/Zero
+  //#endif
   Serial.begin(115200);
   Serial.println("Accelerometer Test"); Serial.println("");
   
   /* Initialise the sensor */
-  if(!accel.begin())
-  {
-    /* There was a problem detecting the ADXL345 ... check your connections */
-    Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
-    while(1);
-  }
+  accel.begin();
+//  if(!accel.begin())
+//  {
+//    /* There was a problem detecting the ADXL345 ... check your connections */
+//    Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
+//    while(1);
+//  }
 
   /* Set the range to whatever is appropriate for your project */
   accel.setRange(ADXL345_RANGE_16_G);

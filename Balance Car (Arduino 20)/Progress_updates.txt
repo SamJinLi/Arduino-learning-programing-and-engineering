@@ -3,4 +3,7 @@ MPU6050 Reads stuff from an exmaple online
 ADXL345 wiring broke
 Didn't test if L298N works
 Don't know if hall sensor works
-Planning on redoing the wiring and coming up with diagrams 
+Planning on redoing the wiring and coming up with diagrams
+
+4/9/2026:
+ADXL345 works on another ESP32. Have outputs
