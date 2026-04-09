@@ -20,12 +20,14 @@ void setup(){
 
         inputString.reserve(200);
 }    
- 
+
 void loop(){
-        input = analogRead(A0);                //read from rotary encoder connected to A0
+        int analogPin = A0;
+        input = analogRead(analogPin);                //read from rotary encoder connected to A0
         output = computePID(input);
         delay(100);
-          Serial.println("output = " + output);
+          Serial.print("output = ");
+          Serial.println(output);
         // analogWrite(3, output);                //control the motor based on PID value
         if(stringComplete)
         {

@@ -27,7 +27,7 @@ int pinButton = 17;
 
 void setup() {
   pinMode(pinLed, OUTPUT);
-  pinMode(pinButton, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
 
   // Sends a clean report to the host. This is important on any Arduino type.
   Gamepad.begin();
@@ -42,7 +42,7 @@ void loop() {
 //  Serial.print(pinButton);
 //  Serial.print(" & read is:");
 //  Serial.println(digitalRead(pinButton));
-  if (!digitalRead(pinButton)) {
+  if (!digitalRead(4)) {
     digitalWrite(pinLed, HIGH);
 
     // Press button 1-32
