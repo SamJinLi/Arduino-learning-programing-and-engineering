@@ -20,12 +20,13 @@ void setup(void) {
   Serial.println("Adafruit MPU6050 test!");
 
   // Try to initialize!
-  if (!mpu.begin()) {
-    Serial.println("Failed to find MPU6050 chip");
-    while (1) {
-      delay(10);
-    }
-  }
+//  if (!mpu.begin(0x68)) {
+//    Serial.println("Failed to find MPU6050 chip");
+//    while (1) {
+//      delay(10);
+//    }
+//  }
+  mpu.begin();
   Serial.println("MPU6050 Found!");
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
