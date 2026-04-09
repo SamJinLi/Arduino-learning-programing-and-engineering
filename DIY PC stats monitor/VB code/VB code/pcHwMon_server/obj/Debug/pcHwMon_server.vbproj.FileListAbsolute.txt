@@ -1,0 +1,15 @@
+C:\Users\the_b\source\repos\pcHwMon_server\bin\Debug\pcHwMon_server.exe.config
+C:\Users\the_b\source\repos\pcHwMon_server\bin\Debug\pcHwMon_server.exe
+C:\Users\the_b\source\repos\pcHwMon_server\bin\Debug\pcHwMon_server.pdb
+C:\Users\the_b\source\repos\pcHwMon_server\bin\Debug\pcHwMon_server.xml
+C:\Users\the_b\source\repos\pcHwMon_server\bin\Debug\OpenHardwareMonitorLib.dll
+C:\Users\the_b\source\repos\pcHwMon_server\bin\Debug\RTSSSharedMemoryNET.dll
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.vbprojAssemblyReference.cache
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.FormMain.resources
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.Resources.resources
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.vbproj.GenerateResource.cache
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.vbproj.CoreCompileInputs.cache
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.vbproj.CopyComplete
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.exe
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.xml
+C:\Users\the_b\source\repos\pcHwMon_server\obj\Debug\pcHwMon_server.pdb

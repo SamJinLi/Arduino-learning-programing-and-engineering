@@ -1,0 +1,86 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+pcHwMon_server
+</name>
+</assembly>
+<members>
+<member name="T:pcHwMon_server.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="T:pcHwMon_server.My.Resources.Resource1">
+<summary>
+  Classe di risorse fortemente tipizzata per la ricerca di stringhe localizzate e così via.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resource1.ResourceManager">
+<summary>
+  Restituisce l'istanza di ResourceManager nella cache utilizzata da questa classe.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resource1.Culture">
+<summary>
+  Esegue l'override della proprietà CurrentUICulture del thread corrente per tutte le
+  ricerche di risorse eseguite utilizzando questa classe di risorse fortemente tipizzata.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resource1.String1">
+<summary>
+  Cerca una stringa localizzata simile a &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-16&quot;?&gt;
+&lt;Task version=&quot;1.4&quot; xmlns=&quot;http://schemas.microsoft.com/windows/2004/02/mit/task&quot;&gt;
+  &lt;RegistrationInfo&gt;
+    &lt;Date&gt;2020-04-23T22:04:12.0813748&lt;/Date&gt;
+    &lt;Author&gt;.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resource1.String2">
+<summary>
+  Cerca una stringa localizzata simile a &lt;/Author&gt;
+    &lt;URI&gt;\PcHwMon_server&lt;/URI&gt;
+  &lt;/RegistrationInfo&gt;
+  &lt;Triggers /&gt;
+  &lt;Principals&gt;
+    &lt;Principal id=&quot;Author&quot;&gt;
+      &lt;UserId&gt;.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resource1.String3">
+<summary>
+  Cerca una stringa localizzata simile a &lt;/UserId&gt;
+      &lt;LogonType&gt;InteractiveToken&lt;/LogonType&gt;
+      &lt;RunLevel&gt;HighestAvailable&lt;/RunLevel&gt;
+    &lt;/Principal&gt;
+  &lt;/Principals&gt;
+  &lt;Settings&gt;
+    &lt;MultipleInstancesPolicy&gt;IgnoreNew&lt;/MultipleInstancesPolicy&gt;
+    &lt;DisallowStartIfOnBatteries&gt;false&lt;/DisallowStartIfOnBatteries&gt;
+    &lt;StopIfGoingOnBatteries&gt;true&lt;/StopIfGoingOnBatteries&gt;
+    &lt;AllowHardTerminate&gt;true&lt;/AllowHardTerminate&gt;
+    &lt;StartWhenAvailable&gt;false&lt;/StartWhenAvailable&gt;
+    &lt;RunOnlyIfNetworkAvailable&gt;false&lt;/RunOnlyIfNetworkAvailable&gt; [stringa troncata]&quot;;.
+</summary>
+</member>
+<member name="P:pcHwMon_server.My.Resources.Resource1.String4">
+<summary>
+  Cerca una stringa localizzata simile a &lt;/Command&gt;
+    &lt;/Exec&gt;
+  &lt;/Actions&gt;
+&lt;/Task&gt;.
+</summary>
+</member>
+</members>
+</doc>
