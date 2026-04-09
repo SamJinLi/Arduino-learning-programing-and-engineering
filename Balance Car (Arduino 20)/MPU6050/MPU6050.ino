@@ -1,3 +1,5 @@
+//Credit:https://randomnerdtutorials.com/esp32-mpu-6050-accelerometer-gyroscope-arduino/
+
 // Basic demo for accelerometer readings from Adafruit MPU6050
 
 // ESP32 Guide: https://RandomNerdTutorials.com/esp32-mpu-6050-accelerometer-gyroscope-arduino/
