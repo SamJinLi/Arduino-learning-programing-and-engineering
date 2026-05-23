@@ -46,7 +46,7 @@ void loop() {
     m2Count = 0;
 
     Serial.print("Motor 1 pulses: ");
-    Serial.println(m1);
+    Serial.print(m1);
 
     Serial.print("Motor 2 pulses: ");
     Serial.println(m2);

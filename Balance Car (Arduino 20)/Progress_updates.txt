@@ -7,3 +7,10 @@ Planning on redoing the wiring and coming up with diagrams
 
 4/9/2026:
 ADXL345 works on another ESP32. Have outputs
+
+5/23/2026:
+- Fixed motor hardware port not connecting
+- Both motor rotates
+- Both encoder works
+- Need to work on directions
+- PWM control
