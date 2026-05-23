@@ -3,7 +3,7 @@
 const int M1_C1 = 34;//UNO side motor C2
 const int M1_C2 = 35;//UNO side motor C1
 const int M2_C1 = 32;//S398N side motor C1
-const int M2_C2 = 33;
+const int M2_C2 = 33;//S398N side motor C2
 
 volatile long m1Count = 0;
 volatile long m2Count = 0;
