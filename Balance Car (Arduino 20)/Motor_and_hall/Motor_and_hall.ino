@@ -1,131 +1,134 @@
 // Two motors with Hall C1/C2 + Motor Outputs
 // ESP32 Arduino
+//L298N IS LEFT SIDE
 
 // ---------- Hall Inputs ----------
-const int M1_C1 = 34;
-const int M1_C2 = 35;
-const int M2_C1 = 32;
-const int M2_C2 = 33;
+const int RIGHT_C1 = 34;
+const int RIGHT_C2 = 35;
+const int LEFT_C1 = 32;
+const int LEFT_C2 = 33;
 
 // ---------- Motor Outputs ----------
-/*
- * "In1" --> S298N Side motor(M2) M2
- * "In2" --> S298N Side motor (M2) M1
- * "In3" --> UNO Side motor (M1) M1
- * "In4" --> UNO Side motor (M1) M2
- * 
- */
-const int M1_OUT1 = 25;//"In4"
-const int M1_OUT2 = 26;//"In3"
-const int M2_OUT1 = 27;//"In2"
-const int M2_OUT2 = 14;//"In1"
 
-volatile long m1Count = 0;
-volatile long m2Count = 0;
+const int RIGHT_PWM = 12; //"ENB"
+const int RIGHT_M1 = 25;//"In4"
+const int RIGHT_M2 = 26;//"In3"
+const int LEFT_PWM = 13; //"ENA"
+const int LEFT_M2 = 27;//"In2"
+const int LEFT_M1 = 14;//"In1"
+
+volatile long rightCount = 0;
+volatile long leftCount = 0;
 
 // ---------- Hall Interrupts ----------
-void IRAM_ATTR m1ISR() {
-  int c2 = digitalRead(M1_C2);
-  if (c2) m1Count++;
-  else    m1Count--;
+void IRAM_ATTR rightISR() {
+  int c2 = digitalRead(RIGHT_C2);
+  if (c2) rightCount++;
+  else    rightCount--;
 }
 
-void IRAM_ATTR m2ISR() {
-  int c2 = digitalRead(M2_C2);
-  if (c2) m2Count++;
-  else    m2Count--;
+void IRAM_ATTR leftISR() {
+  int c2 = digitalRead(LEFT_C2);
+  if (c2) leftCount++;
+  else    leftCount--;
 }
+
+// PWM properties
+const int freq = 1000;        // PWM frequency
+const int pwmChannelA = 0;    // PWM channel for right motor
+const int pwmChannelB = 1;    // PWM channel for left motor
+const int resolution = 8;     // 8-bit resolution (0-255)
 
 // ---------- Motor Control ----------
-void motor1Forward() {
-  digitalWrite(M1_OUT1, HIGH);
-  digitalWrite(M1_OUT2, LOW);
+void setRightMotor(int PWMOut, bool in1High, bool in2High) {
+  ledcWrite(RIGHT_PWM, PWMOut);
+  digitalWrite(RIGHT_M1, in1High ? HIGH : LOW);
+  digitalWrite(RIGHT_M2, in2High ? HIGH : LOW);
+}
+void rightForward() {
+  setRightMotor(255, true, false);
 }
 
-void motor1Reverse() {
-  digitalWrite(M1_OUT1, LOW);
-  digitalWrite(M1_OUT2, HIGH);
+void rightReverse() {
+  setRightMotor(255,false, true);
 }
 
-void motor1Brake() {
-  digitalWrite(M1_OUT1, HIGH);
-  digitalWrite(M1_OUT2, HIGH);
+void rightBrake() {
+  setRightMotor(255,true,true);
 }
 
-void motor1Coast() {
-  digitalWrite(M1_OUT1, LOW);
-  digitalWrite(M1_OUT2, LOW);
+void rightCoast() {
+  setRightMotor(0,false,false);
 }
 
-void motor2Forward() {
-  digitalWrite(M2_OUT1, HIGH);
-  digitalWrite(M2_OUT2, LOW);
+void setLeftMotor(int PWMOut, bool in1High, bool in2High) {
+  ledcWrite(LEFT_PWM, PWMOut);
+  digitalWrite(LEFT_M1, in1High ? HIGH : LOW);
+  digitalWrite(LEFT_M2, in2High ? HIGH : LOW);
+}
+void leftForward() {
+  setLeftMotor(255, false, true);
 }
 
-void motor2Reverse() {
-  digitalWrite(M2_OUT1, LOW);
-  digitalWrite(M2_OUT2, HIGH);
+void leftReverse() {
+  setLeftMotor(255,true, false);
 }
 
-void motor2Brake() {
-  digitalWrite(M2_OUT1, HIGH);
-  digitalWrite(M2_OUT2, HIGH);
+void leftBrake() {
+  setLeftMotor(255,true,true);
 }
 
-void motor2Coast() {
-  digitalWrite(M2_OUT1, LOW);
-  digitalWrite(M2_OUT2, LOW);
+void leftCoast() {
+  setLeftMotor(0,false,false);
 }
 
 void setup() {
   Serial.begin(115200);
 
   // Hall inputs
-  pinMode(M1_C1, INPUT);
-  pinMode(M1_C2, INPUT);
-  pinMode(M2_C1, INPUT);
-  pinMode(M2_C2, INPUT);
+  pinMode(RIGHT_C1, INPUT);
+  pinMode(RIGHT_C2, INPUT);
+  pinMode(LEFT_C1, INPUT);
+  pinMode(LEFT_C2, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(M1_C1), m1ISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(M2_C1), m2ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(RIGHT_C1), rightISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(LEFT_C1), leftISR, RISING);
 
   // Motor outputs
-  pinMode(M1_OUT1, OUTPUT);
-  pinMode(M1_OUT2, OUTPUT);
-  pinMode(M2_OUT1, OUTPUT);
-  pinMode(M2_OUT2, OUTPUT);
+  pinMode(RIGHT_PWM, OUTPUT);
+  pinMode(RIGHT_M1, OUTPUT);
+  pinMode(RIGHT_M2, OUTPUT);
+  pinMode(LEFT_PWM, OUTPUT);
+  pinMode(LEFT_M2, OUTPUT);
+  pinMode(LEFT_M1, OUTPUT);
 
-  motor1Coast();
-  motor2Coast();
+  ledcAttachChannel(RIGHT_PWM, freq, resolution, pwmChannelA);
+  ledcAttachChannel(LEFT_PWM, freq, resolution, pwmChannelB);
+
+  rightCoast();
+  leftCoast();
 }
 
 void loop() {
   static unsigned long last = 0;
   unsigned long now = millis();
 
-  // Example: alternate motor directions every 3 seconds
-  if ((now / 3000) % 2 == 0) {
-    motor1Forward();
-    motor2Reverse();
-  } else {
-    motor1Reverse();
-    motor2Forward();
-  }
-
+    setRightMotor(50,true,false);
+    setLeftMotor(50,false,true);
   // Print hall counts every second
-  if (now - last >= 1000) {
+  if (now - last >= 250) {
     last = now;
 
-    long m1 = m1Count;
-    long m2 = m2Count;
+    long right = rightCount;
+    long left = leftCount;
 
-    m1Count = 0;
-    m2Count = 0;
+    rightCount = 0;
+    leftCount = 0;
 
-    Serial.print("Motor 1 pulses: ");
-    Serial.print(m1);
+    Serial.print(" right-pulses: ");
+    Serial.print(right);
 
-    Serial.print(" Motor 2 pulses: ");
-    Serial.println(m2);
+    Serial.print(" left-pulses: ");
+    Serial.println(left);
   }
 }
