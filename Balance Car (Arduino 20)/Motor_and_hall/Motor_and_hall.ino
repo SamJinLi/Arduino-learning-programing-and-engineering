@@ -24,6 +24,21 @@ int targetLeftPWM = 0;
 int targetRightPWM = 0;
 bool serialControlActive = false;
 
+// ---------- Encoder Configuration ----------
+// Measure these values for your specific setup:
+const float PULSES_PER_REVOLUTION = 11.0;
+const float GEAR_RATIO = 30.0;               //30:1 gearbox = 30.0
+
+// Calculate total pulses per wheel revolution
+const float PULSES_PER_WHEEL_REV = PULSES_PER_REVOLUTION * GEAR_RATIO;
+
+// Conversion factors
+const float RADIANS_PER_PULSE = (2.0 * PI) / PULSES_PER_WHEEL_REV;
+
+float filteredLeftVel = 0;
+float filteredRightVel = 0;
+const float ALPHA = 0.3;  // Low-pass filter coefficient (0-1, lower = more smoothing)
+
 // ---------- Motor Outputs ----------
 
 const int RIGHT_PWM = 12; //"ENB"
@@ -251,35 +266,38 @@ void loop() {
     bool leftDir = leftDirection;
     interrupts();
 
-    // Calculate speed (pulses per second)
-    float rightSpeed = (right - lastRightCount) * 4.0;  // pulses per second
-    float leftSpeed = (left - lastLeftCount) * 4.0;
+        // Calculate delta counts
+    long deltaRight = right - lastRightCount;
+    long deltaLeft = left - lastLeftCount;
     
+    // Calculate angular velocity (degrees per second)
+    float timeDelta = (now - lastPrint);  // Actual time interval in ms
+    float rawRightVel = deltaRight * RADIANS_PER_PULSE * (1000.0 / timeDelta);
+    float rawLeftVel = deltaLeft * RADIANS_PER_PULSE * (1000.0 / timeDelta);
+    
+    // Apply low-pass filter to reduce noise
+    filteredRightVel = ALPHA * rawRightVel + (1 - ALPHA) * filteredRightVel;
+    filteredLeftVel = ALPHA * rawLeftVel + (1 - ALPHA) * filteredLeftVel;
+
     // Store for next calculation
     lastRightCount = right;
     lastLeftCount = left;
     lastPrint = now;
-
-    // Print results with current PWM values if serial control is active
-    Serial.print("Left Motor PWM: ");
-    Serial.print(targetLeftPWM);
-    Serial.print(" | Left: ");
-    Serial.print(left);
-    Serial.print(" pulses ");
-    Serial.print(leftDir ? "FWD" : "REV");
-    Serial.print(" | Speed: ");
-    Serial.print(leftSpeed);
-    Serial.print(" pps");
     
-    Serial.print(" | Right Motor PWM: ");
+    // Print filtered velocities
+    Serial.print("L_PWM:");
+    Serial.print(targetLeftPWM);
+    Serial.print(" R_PWM:");
     Serial.print(targetRightPWM);
-    Serial.print(" | Right: ");
-    Serial.print(right);
-    Serial.print(" pulses ");
-    Serial.print(rightDir ? "FWD" : "REV");
-    Serial.print(" | Speed: ");
-    Serial.print(rightSpeed);
-    Serial.println(" pps");
+    Serial.print(" | L_vel: ");
+    Serial.print(filteredLeftVel, 2);
+    Serial.print(" rad/s ");
+    Serial.print(leftDir ? "F" : "R");
+    Serial.print(" | R_vel: ");
+    Serial.print(filteredRightVel, 2);
+    Serial.print(" rad/s ");
+    Serial.print(rightDir ? "F" : "R");
+    Serial.println();
   }
   updateSpeedFromSerial();
 }
