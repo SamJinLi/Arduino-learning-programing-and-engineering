@@ -42,12 +42,12 @@ void IRAM_ATTR rightISR() {
   if (c1 != lastRightC1) {
     if (c1 == c2) {
       // Forward direction
-      rightCount++;
-      rightDirection = true;
-    } else {
-      // Reverse direction
       rightCount--;
       rightDirection = false;
+    } else {
+      // Reverse direction
+      rightCount++;
+      rightDirection = true;
     }
     lastRightC1 = c1;
   }
@@ -61,12 +61,12 @@ void IRAM_ATTR leftISR() {
   if (c1 != lastLeftC1) {
     if (c1 == c2) {
       // Forward direction
-      leftCount++;
-      leftDirection = true;
-    } else {
-      // Reverse direction
       leftCount--;
       leftDirection = false;
+    } else {
+      // Reverse direction
+      leftCount++;
+      leftDirection = true;
     }
     lastLeftC1 = c1;
   }
@@ -123,48 +123,7 @@ void leftCoast() {
   setLeftMotor(0, false, false);
 }
 
-void setup() {
-  Serial.begin(115200);
-
-  // Hall inputs
-  pinMode(RIGHT_C1, INPUT);
-  pinMode(RIGHT_C2, INPUT);
-  pinMode(LEFT_C1, INPUT);
-  pinMode(LEFT_C2, INPUT);
-
-  // Read initial states
-  lastRightC1 = digitalRead(RIGHT_C1);
-  lastLeftC1 = digitalRead(LEFT_C1);
-
-  // Attach interrupts on BOTH channels for better accuracy
-  attachInterrupt(digitalPinToInterrupt(RIGHT_C1), rightISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(RIGHT_C2), rightISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(LEFT_C1), leftISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(LEFT_C2), leftISR, CHANGE);
-
-  // Motor outputs
-  pinMode(RIGHT_PWM, OUTPUT);
-  pinMode(RIGHT_M1, OUTPUT);
-  pinMode(RIGHT_M2, OUTPUT);
-  pinMode(LEFT_PWM, OUTPUT);
-  pinMode(LEFT_M2, OUTPUT);
-  pinMode(LEFT_M1, OUTPUT);
-
-  ledcAttachChannel(RIGHT_PWM, freq, resolution, pwmChannelA);
-  ledcAttachChannel(LEFT_PWM, freq, resolution, pwmChannelB);
-
-  rightCoast();
-  leftCoast();
-}
-
-void loop() {
-  static unsigned long lastPrint = 0;
-  static unsigned long lastRightCount = 0;
-  static unsigned long lastLeftCount = 0;
-  unsigned long now = millis();
-
-  // ---------- Serial PWM Control ----------
-  // Check for serial input
+void updateSpeedFromSerial() {
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     input.trim();
@@ -239,6 +198,47 @@ void loop() {
   //   rightForward(200);
   //   leftForward(200);
   // }
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Hall inputs
+  pinMode(RIGHT_C1, INPUT);
+  pinMode(RIGHT_C2, INPUT);
+  pinMode(LEFT_C1, INPUT);
+  pinMode(LEFT_C2, INPUT);
+
+  // Read initial states
+  lastRightC1 = digitalRead(RIGHT_C1);
+  lastLeftC1 = digitalRead(LEFT_C1);
+
+  // Attach interrupts on BOTH channels for better accuracy
+  attachInterrupt(digitalPinToInterrupt(RIGHT_C1), rightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RIGHT_C2), rightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LEFT_C1), leftISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LEFT_C2), leftISR, CHANGE);
+
+  // Motor outputs
+  pinMode(RIGHT_PWM, OUTPUT);
+  pinMode(RIGHT_M1, OUTPUT);
+  pinMode(RIGHT_M2, OUTPUT);
+  pinMode(LEFT_PWM, OUTPUT);
+  pinMode(LEFT_M2, OUTPUT);
+  pinMode(LEFT_M1, OUTPUT);
+
+  ledcAttachChannel(RIGHT_PWM, freq, resolution, pwmChannelA);
+  ledcAttachChannel(LEFT_PWM, freq, resolution, pwmChannelB);
+
+  rightCoast();
+  leftCoast();
+}
+
+void loop() {
+  static unsigned long lastPrint = 0;
+  static unsigned long lastRightCount = 0;
+  static unsigned long lastLeftCount = 0;
+  unsigned long now = millis();
 
   // ---------- Hall Sensor Monitoring (Always active) ----------
   // Print hall counts and speed every 250ms
@@ -281,4 +281,5 @@ void loop() {
     Serial.print(rightSpeed);
     Serial.println(" pps");
   }
+  updateSpeedFromSerial();
 }
