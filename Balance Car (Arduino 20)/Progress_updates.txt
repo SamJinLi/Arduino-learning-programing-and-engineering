@@ -14,3 +14,8 @@ ADXL345 works on another ESP32. Have outputs
 - Both encoder works
 - Need to work on directions
 - PWM control
+- Motor_and_hall.ino have the motor stuff
+- ADXL345test.ino have the adxl345 stuff
+- MPU6050.ino have the mpu stuff
+
+- 0x53 is ADXL345

@@ -16,7 +16,7 @@ bool stringComplete = false;
 void setup(){
         setPoint = 0;                          //set point at zero degrees
 
-        Serial.begin(9600);
+        Serial.begin(115200);
 
         inputString.reserve(200);
 }    

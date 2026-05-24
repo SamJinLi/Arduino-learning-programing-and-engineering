@@ -138,6 +138,60 @@ void leftCoast() {
   setLeftMotor(0, false, false);
 }
 
+// ---------- Velocity Monitoring and Filtering ----------
+void updateAndPrintVelocity() {
+  static unsigned long lastPrint = 0;
+  static unsigned long lastRightCount = 0;
+  static unsigned long lastLeftCount = 0;
+  unsigned long now = millis();
+  
+  // 每 50ms 更新一次（20Hz，适合自平衡车）
+  if (now - lastPrint < 50) {
+    return;  // 还没到更新时间
+  }
+  
+  // 读取编码器值（禁用中断防止数据损坏）
+  noInterrupts();
+  long right = rightCount;
+  long left = leftCount;
+  bool rightDir = rightDirection;
+  bool leftDir = leftDirection;
+  interrupts();
+  
+  // 计算增量
+  long deltaRight = right - lastRightCount;
+  long deltaLeft = left - lastLeftCount;
+  
+  // 计算角速度 (rad/s)
+  float timeDelta = (now - lastPrint);  // 实际时间间隔 (ms)
+  float rawRightVel = deltaRight * RADIANS_PER_PULSE * (1000.0 / timeDelta);
+  float rawLeftVel = deltaLeft * RADIANS_PER_PULSE * (1000.0 / timeDelta);
+  
+  // 低通滤波 (外部定义 filteredLeftVel, filteredRightVel, ALPHA)
+  filteredRightVel = ALPHA * rawRightVel + (1 - ALPHA) * filteredRightVel;
+  filteredLeftVel = ALPHA * rawLeftVel + (1 - ALPHA) * filteredLeftVel;
+  
+  // 存储用于下次计算
+  lastRightCount = right;
+  lastLeftCount = left;
+  lastPrint = now;
+  
+  // 打印结果
+  Serial.print("L_PWM:");
+  Serial.print(targetLeftPWM);
+  Serial.print(" R_PWM:");
+  Serial.print(targetRightPWM);
+  Serial.print(" | L_vel: ");
+  Serial.print(filteredLeftVel, 2);
+  Serial.print(" rad/s ");
+  Serial.print(leftDir ? "F" : "R");
+  Serial.print(" | R_vel: ");
+  Serial.print(filteredRightVel, 2);
+  Serial.print(" rad/s ");
+  Serial.print(rightDir ? "F" : "R");
+  Serial.println();
+}
+
 void updateSpeedFromSerial() {
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
@@ -250,54 +304,6 @@ void setup() {
 }
 
 void loop() {
-  static unsigned long lastPrint = 0;
-  static unsigned long lastRightCount = 0;
-  static unsigned long lastLeftCount = 0;
-  unsigned long now = millis();
-
-  // ---------- Hall Sensor Monitoring (Always active) ----------
-  // Print hall counts and speed every 250ms
-  if (now - lastPrint >= 250) {
-    // Disable interrupts while reading to prevent corruption
-    noInterrupts();
-    long right = rightCount;
-    long left = leftCount;
-    bool rightDir = rightDirection;
-    bool leftDir = leftDirection;
-    interrupts();
-
-        // Calculate delta counts
-    long deltaRight = right - lastRightCount;
-    long deltaLeft = left - lastLeftCount;
-    
-    // Calculate angular velocity (degrees per second)
-    float timeDelta = (now - lastPrint);  // Actual time interval in ms
-    float rawRightVel = deltaRight * RADIANS_PER_PULSE * (1000.0 / timeDelta);
-    float rawLeftVel = deltaLeft * RADIANS_PER_PULSE * (1000.0 / timeDelta);
-    
-    // Apply low-pass filter to reduce noise
-    filteredRightVel = ALPHA * rawRightVel + (1 - ALPHA) * filteredRightVel;
-    filteredLeftVel = ALPHA * rawLeftVel + (1 - ALPHA) * filteredLeftVel;
-
-    // Store for next calculation
-    lastRightCount = right;
-    lastLeftCount = left;
-    lastPrint = now;
-    
-    // Print filtered velocities
-    Serial.print("L_PWM:");
-    Serial.print(targetLeftPWM);
-    Serial.print(" R_PWM:");
-    Serial.print(targetRightPWM);
-    Serial.print(" | L_vel: ");
-    Serial.print(filteredLeftVel, 2);
-    Serial.print(" rad/s ");
-    Serial.print(leftDir ? "F" : "R");
-    Serial.print(" | R_vel: ");
-    Serial.print(filteredRightVel, 2);
-    Serial.print(" rad/s ");
-    Serial.print(rightDir ? "F" : "R");
-    Serial.println();
-  }
   updateSpeedFromSerial();
+  updateAndPrintVelocity(); // 更新速度滤波并打印
 }

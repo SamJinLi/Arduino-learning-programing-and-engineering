@@ -12,6 +12,23 @@
 
 Adafruit_MPU6050 mpu;
 
+float currentAccelX = 0;
+float currentAccelY = 0;
+float currentAccelZ = 0;
+float currentGyroX = 0;
+float currentGyroY = 0;
+float currentGyroZ = 0;
+float currentTemp = 0;
+
+float getAccelX();
+float getAccelY();
+float getAccelZ();
+float getGyroX();
+float getGyroY();
+float getGyroZ();
+float getTemperature();
+void updateMPUData();  // New function to update all readings
+
 void setup(void) {
   Serial.begin(115200);
   while (!Serial)
@@ -19,16 +36,8 @@ void setup(void) {
 
   Serial.println("Adafruit MPU6050 test!");
 
-  // Try to initialize!
-//  if (!mpu.begin(0x68)) {
-//    Serial.println("Failed to find MPU6050 chip");
-//    while (1) {
-//      delay(10);
-//    }
-//  }
   mpu.begin();
-  Serial.println("MPU6050 Found!");
-
+  
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   Serial.print("Accelerometer range set to: ");
   switch (mpu.getAccelerometerRange()) {
@@ -62,7 +71,7 @@ void setup(void) {
     break;
   }
 
-  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+  mpu.setFilterBandwidth(MPU6050_BAND_94_HZ);
   Serial.print("Filter bandwidth set to: ");
   switch (mpu.getFilterBandwidth()) {
   case MPU6050_BAND_260_HZ:
@@ -93,31 +102,64 @@ void setup(void) {
 }
 
 void loop() {
-  /* Get new sensor events with the readings */
+  updateMPUData();  // Update all sensor readings
+  
+  static unsigned long lastPrint = 0;
+  if (millis() - lastPrint >= 250) {
+    lastPrint = millis();
+    Serial.print("accel(m/s^2)-X:");
+    Serial.print(currentAccelX);
+    Serial.print(",");
+    Serial.print("Y:");
+    Serial.print(currentAccelY);
+    Serial.print(",");
+    Serial.print("Z:");
+    Serial.print(currentAccelZ);
+    Serial.print(",");
+    
+    Serial.print("Velx`(rad/s)-X:");
+    Serial.print(currentGyroX);
+    Serial.print(",");
+    Serial.print("Y:");
+    Serial.print(currentGyroY);
+    Serial.print(",");
+    Serial.print("Z:");
+    Serial.print(currentGyroZ);
+    Serial.print(",");
+    
+    Serial.print("Temperature(degC):");
+    Serial.println(currentTemp);
+  }
+}
+
+void updateMPUData() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
+  
+  currentAccelX = a.acceleration.x;
+  currentAccelY = a.acceleration.y;
+  currentAccelZ = a.acceleration.z;
+  currentGyroX = g.gyro.x;
+  currentGyroY = g.gyro.y;
+  currentGyroZ = g.gyro.z;
+  currentTemp = temp.temperature;
+}
 
-  /* Print out the values */
-  Serial.print("Acceleration X: ");
-  Serial.print(a.acceleration.x);
-  Serial.print(", Y: ");
-  Serial.print(a.acceleration.y);
-  Serial.print(", Z: ");
-  Serial.print(a.acceleration.z);
-  Serial.println(" m/s^2");
+float getAccelX() { return currentAccelX; }
+float getAccelY() { return currentAccelY; }
+float getAccelZ() { return currentAccelZ; }
+float getGyroX() { return currentGyroX; }
+float getGyroY() { return currentGyroY; }
+float getGyroZ() { return currentGyroZ; }
+float getTemperature() { return currentTemp; }
 
-  Serial.print("Rotation X: ");
-  Serial.print(g.gyro.x);
-  Serial.print(", Y: ");
-  Serial.print(g.gyro.y);
-  Serial.print(", Z: ");
-  Serial.print(g.gyro.z);
-  Serial.println(" rad/s");
+float getPitchRads() {
+  // pitch = atan2(-accelX, sqrt(accelY^2 + accelZ^2))
+  float pitch = atan2(-currentAccelX, sqrt(currentAccelY * currentAccelY + currentAccelZ * currentAccelZ));
+  return pitch;  // Returns in radians
+}
 
-  Serial.print("Temperature: ");
-  Serial.print(temp.temperature);
-  Serial.println(" degC");
-
-  Serial.println("");
-  delay(500);
+float getRollRads() {
+  float roll = atan2(currentAccelY, currentAccelZ);
+  return roll;  // Returns in radians
 }
