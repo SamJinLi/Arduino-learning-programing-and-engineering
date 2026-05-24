@@ -8,6 +8,22 @@ const int RIGHT_C2 = 35;
 const int LEFT_C1 = 32;
 const int LEFT_C2 = 33;
 
+// Counter variables for each channel
+volatile long rightCount = 0;
+volatile long leftCount = 0;
+
+// Store previous states for edge detection
+volatile bool lastRightC1 = false;
+volatile bool lastLeftC1 = false;
+
+// Direction flags
+volatile bool rightDirection = true;  // true = forward, false = reverse
+volatile bool leftDirection = true;
+
+int targetLeftPWM = 0;
+int targetRightPWM = 0;
+bool serialControlActive = false;
+
 // ---------- Motor Outputs ----------
 
 const int RIGHT_PWM = 12; //"ENB"
@@ -17,20 +33,43 @@ const int LEFT_PWM = 13; //"ENA"
 const int LEFT_M2 = 27;//"In2"
 const int LEFT_M1 = 14;//"In1"
 
-volatile long rightCount = 0;
-volatile long leftCount = 0;
-
-// ---------- Hall Interrupts ----------
+// ---------- Hall Interrupts (Quadrature Decoding) ----------
 void IRAM_ATTR rightISR() {
-  int c2 = digitalRead(RIGHT_C2);
-  if (c2) rightCount++;
-  else    rightCount--;
+  bool c1 = digitalRead(RIGHT_C1);
+  bool c2 = digitalRead(RIGHT_C2);
+  
+  // Determine direction and count
+  if (c1 != lastRightC1) {
+    if (c1 == c2) {
+      // Forward direction
+      rightCount++;
+      rightDirection = true;
+    } else {
+      // Reverse direction
+      rightCount--;
+      rightDirection = false;
+    }
+    lastRightC1 = c1;
+  }
 }
 
 void IRAM_ATTR leftISR() {
-  int c2 = digitalRead(LEFT_C2);
-  if (c2) leftCount++;
-  else    leftCount--;
+  bool c1 = digitalRead(LEFT_C1);
+  bool c2 = digitalRead(LEFT_C2);
+  
+  // Determine direction and count
+  if (c1 != lastLeftC1) {
+    if (c1 == c2) {
+      // Forward direction
+      leftCount++;
+      leftDirection = true;
+    } else {
+      // Reverse direction
+      leftCount--;
+      leftDirection = false;
+    }
+    lastLeftC1 = c1;
+  }
 }
 
 // PWM properties
@@ -45,20 +84,21 @@ void setRightMotor(int PWMOut, bool in1High, bool in2High) {
   digitalWrite(RIGHT_M1, in1High ? HIGH : LOW);
   digitalWrite(RIGHT_M2, in2High ? HIGH : LOW);
 }
-void rightForward() {
-  setRightMotor(255, true, false);
+
+void rightForward(int PWMOut = 255) {
+  setRightMotor(constrain(PWMOut, 0, 255), true, false);
 }
 
-void rightReverse() {
-  setRightMotor(255,false, true);
+void rightReverse(int PWMOut = 255) {
+  setRightMotor(constrain(PWMOut, 0, 255), false, true);
 }
 
-void rightBrake() {
-  setRightMotor(255,true,true);
+void rightBrake(int PWMOut = 255) {
+  setRightMotor(constrain(PWMOut, 0, 255), true, true);
 }
 
 void rightCoast() {
-  setRightMotor(0,false,false);
+  setRightMotor(0, false, false);
 }
 
 void setLeftMotor(int PWMOut, bool in1High, bool in2High) {
@@ -66,20 +106,21 @@ void setLeftMotor(int PWMOut, bool in1High, bool in2High) {
   digitalWrite(LEFT_M1, in1High ? HIGH : LOW);
   digitalWrite(LEFT_M2, in2High ? HIGH : LOW);
 }
-void leftForward() {
-  setLeftMotor(255, false, true);
+
+void leftForward(int PWMOut = 255) {
+  setLeftMotor(constrain(PWMOut, 0, 255), false, true);
 }
 
-void leftReverse() {
-  setLeftMotor(255,true, false);
+void leftReverse(int PWMOut = 255) {
+  setLeftMotor(constrain(PWMOut, 0, 255), true, false);
 }
 
-void leftBrake() {
-  setLeftMotor(255,true,true);
+void leftBrake(int PWMOut = 255) {
+  setLeftMotor(constrain(PWMOut, 0, 255), true, true);
 }
 
 void leftCoast() {
-  setLeftMotor(0,false,false);
+  setLeftMotor(0, false, false);
 }
 
 void setup() {
@@ -91,8 +132,15 @@ void setup() {
   pinMode(LEFT_C1, INPUT);
   pinMode(LEFT_C2, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(RIGHT_C1), rightISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(LEFT_C1), leftISR, RISING);
+  // Read initial states
+  lastRightC1 = digitalRead(RIGHT_C1);
+  lastLeftC1 = digitalRead(LEFT_C1);
+
+  // Attach interrupts on BOTH channels for better accuracy
+  attachInterrupt(digitalPinToInterrupt(RIGHT_C1), rightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RIGHT_C2), rightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LEFT_C1), leftISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LEFT_C2), leftISR, CHANGE);
 
   // Motor outputs
   pinMode(RIGHT_PWM, OUTPUT);
@@ -110,25 +158,127 @@ void setup() {
 }
 
 void loop() {
-  static unsigned long last = 0;
+  static unsigned long lastPrint = 0;
+  static unsigned long lastRightCount = 0;
+  static unsigned long lastLeftCount = 0;
   unsigned long now = millis();
 
-    setRightMotor(50,true,false);
-    setLeftMotor(50,false,true);
-  // Print hall counts every second
-  if (now - last >= 250) {
-    last = now;
+  // ---------- Serial PWM Control ----------
+  // Check for serial input
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    
+    int spaceIndex = input.indexOf(' ');
+    if (spaceIndex > 0) {
+      // Parse two integers: left and right PWM values
+      int leftVal = input.substring(0, spaceIndex).toInt();
+      int rightVal = input.substring(spaceIndex + 1).toInt();
+      
+      // Constrain values to valid range (-255 to 255)
+      targetLeftPWM = constrain(leftVal, -255, 255);
+      targetRightPWM = constrain(rightVal, -255, 255);
+      
+      serialControlActive = true;
+      
+      // Apply motor settings based on sign
+      // Left motor control
+      if (targetLeftPWM > 0) {
+        leftForward(targetLeftPWM);
+        Serial.print("Left Forward: ");
+        Serial.println(targetLeftPWM);
+      } else if (targetLeftPWM < 0) {
+        leftReverse(-targetLeftPWM);
+        Serial.print("Left Reverse: ");
+        Serial.println(-targetLeftPWM);
+      } else {
+        leftCoast();
+        Serial.println("Left Stop");
+      }
+      
+      // Right motor control
+      if (targetRightPWM > 0) {
+        rightForward(targetRightPWM);
+        Serial.print("Right Forward: ");
+        Serial.println(targetRightPWM);
+      } else if (targetRightPWM < 0) {
+        rightReverse(-targetRightPWM);
+        Serial.print("Right Reverse: ");
+        Serial.println(-targetRightPWM);
+      } else {
+        rightCoast();
+        Serial.println("Right Stop");
+      }
+    } 
+    else if (input == "stop" || input == "s") {
+      // Emergency stop
+      leftCoast();
+      rightCoast();
+      targetLeftPWM = 0;
+      targetRightPWM = 0;
+      serialControlActive = false;
+      Serial.println("EMERGENCY STOP - Motors stopped");
+    }
+    else if (input == "help" || input == "h") {
+      Serial.println("=== Motor Control Commands ===");
+      Serial.println("Format: [left_PWM] [right_PWM]");
+      Serial.println("Range: -255 to 255");
+      Serial.println("Examples:");
+      Serial.println("  150 200  - Left:150 FWD, Right:200 FWD");
+      Serial.println("  -100 80  - Left:100 REV, Right:80 FWD");
+      Serial.println("  0 0      - Stop both motors");
+      Serial.println("  stop     - Emergency stop");
+      Serial.println("  help     - Show this message");
+      Serial.println("==============================");
+    }
+  }
 
+  // If no serial command received, you can add default behavior here
+  // For testing without serial, uncomment the lines below:
+  // if (!serialControlActive) {
+  //   rightForward(200);
+  //   leftForward(200);
+  // }
+
+  // ---------- Hall Sensor Monitoring (Always active) ----------
+  // Print hall counts and speed every 250ms
+  if (now - lastPrint >= 250) {
+    // Disable interrupts while reading to prevent corruption
+    noInterrupts();
     long right = rightCount;
     long left = leftCount;
+    bool rightDir = rightDirection;
+    bool leftDir = leftDirection;
+    interrupts();
 
-    rightCount = 0;
-    leftCount = 0;
+    // Calculate speed (pulses per second)
+    float rightSpeed = (right - lastRightCount) * 4.0;  // pulses per second
+    float leftSpeed = (left - lastLeftCount) * 4.0;
+    
+    // Store for next calculation
+    lastRightCount = right;
+    lastLeftCount = left;
+    lastPrint = now;
 
-    Serial.print(" right-pulses: ");
+    // Print results with current PWM values if serial control is active
+    Serial.print("Left Motor PWM: ");
+    Serial.print(targetLeftPWM);
+    Serial.print(" | Left: ");
+    Serial.print(left);
+    Serial.print(" pulses ");
+    Serial.print(leftDir ? "FWD" : "REV");
+    Serial.print(" | Speed: ");
+    Serial.print(leftSpeed);
+    Serial.print(" pps");
+    
+    Serial.print(" | Right Motor PWM: ");
+    Serial.print(targetRightPWM);
+    Serial.print(" | Right: ");
     Serial.print(right);
-
-    Serial.print(" left-pulses: ");
-    Serial.println(left);
+    Serial.print(" pulses ");
+    Serial.print(rightDir ? "FWD" : "REV");
+    Serial.print(" | Speed: ");
+    Serial.print(rightSpeed);
+    Serial.println(" pps");
   }
 }
